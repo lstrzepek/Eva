@@ -1,3 +1,5 @@
+const { resolve } = require("path");
+
 class Environment {
   constructor(record = {}, parent = null) {
     this.record = record;
@@ -12,13 +14,25 @@ class Environment {
   }
 
   lookup(name) {
-    if (Object.getOwnPropertyDescriptor(this.record, name) === undefined){
-      if(this.parent !== null){
-        return this.parent.lookup(name);
-      }
-      throw `Variable "${name}" is undefined in current scope`;
+    return this.resolve(name).record[name];
+  }
+
+  assign(name, value) {
+    this.resolve(name).record[name] = value;
+    return value;
+  }
+
+
+  resolve(name) {
+    if (this.record.hasOwnProperty(name)) {
+      return this
     }
-    return this.record[name];
+    else {
+      if (this.parent === null) {
+        throw new ReferenceError(`Variable "${name}" is not defined.`);
+      }
+      return this.parent.resolve(name);
+    }
   }
 }
 

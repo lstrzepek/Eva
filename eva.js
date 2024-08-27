@@ -1,4 +1,3 @@
-const exp = require('constants');
 const Environment = require('./Environment');
 //import assert from 'assert';
 
@@ -25,19 +24,37 @@ class Eva {
       return expr.slice(1, -1);
     }
 
-    // Math operations
-    //if (expr[0] === '+') {
-    //  return this.eval(expr[1], env) + this.eval(expr[2], env);
-    //}
-    // Variable assignment
+    // Variable declaration:
+    // ['var', 'x', 10]
     if (expr[0] === 'var') {
       const [_, name, value] = expr;
       return env.define(name, this.eval(value, env));
     }
-    // Scopes
+    // Variable assignment:
+    // ['set', 'x', 100]
+    if (expr[0] === 'set') {
+      const [_, name, value] = expr;
+      return env.assign(name, value);
+    }
+    // Blocks
+    // ['begin',
+    //    ['var', 'x', 4],
+    //    ['var', 'y', 6],
+    //    ['*', 'x', 'y']
+    //  ]
     if (expr[0] === 'begin') {
       const newEnv = new Environment({}, env);
-      return this._evalScope(expr, newEnv);
+      return this._evalBlock(expr, newEnv);
+    }
+    // if expressions
+    // ['if', ['>','x',5],['-', 'x',2]]
+    if (expr[0] === 'if') {
+      const [_, predicate, body] = expr;
+      if (this.eval(predicate, env) === true) {
+        const newEnv = new Environment({}, env);
+        return this._evalBlock(body, newEnv);
+      }
+      return false;
     }
     // Variable lookup
     if (this._isVariableName(expr, env)) {
@@ -63,7 +80,7 @@ class Eva {
   _isVariableName(expr) {
     return typeof expr === 'string' //TODO: Add regexp
   }
-  _evalScope(expr, env) {
+  _evalBlock(expr, env) {
     let result;
     const [_, ...body] = expr;
     body.forEach(e => {

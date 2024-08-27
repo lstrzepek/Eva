@@ -4,7 +4,8 @@ const tests = [
   require('./self-evaluated.js'),
   require('./built-in-functions.js'),
   require('./variables.js'),
-  require('./blocks.js')
+  require('./blocks.js'),
+  require('./if-expression.js')
 ];
 try {
   const eva = new Eva();

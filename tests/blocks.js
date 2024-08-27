@@ -15,6 +15,14 @@ module.exports = eva => {
         'x'
       ],
       'x'
-    ], 9, "Declaration in inner block should not inferre with outher block")
+    ], 9, "Declaration in inner block should not inferre with outher block.")
+  test(eva,
+    ['begin',
+      ['var', 'x', 9],
+      ['begin',
+        ['set', 'x', 10],
+      ],
+      'x'
+    ], 10, "Assignment in inner block should change value in outer scope.")
 };
 
